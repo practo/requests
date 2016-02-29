@@ -11,6 +11,7 @@ requests (cookies, auth, proxies).
 import os
 from collections import Mapping
 from datetime import datetime
+from uuid import uuid4
 
 from .auth import _basic_auth_str
 from .compat import cookielib, OrderedDict, urljoin, urlparse
@@ -403,7 +404,8 @@ class Session(SessionRedirectMixin):
         stream=None,
         verify=None,
         cert=None,
-        json=None):
+        json=None,
+        cid=None):
         """Constructs a :class:`Request <Request>`, prepares it and sends it.
         Returns :class:`Response <Response>` object.
 
@@ -438,6 +440,17 @@ class Session(SessionRedirectMixin):
         :param cert: (optional) if String, path to ssl client cert file (.pem).
             If Tuple, ('cert', 'key') pair.
         """
+
+        # Check for a passed cid, if found, insert it into the header.
+        # If no cid is passed, generate a new cid and insert it into the header.
+        if cid is None:
+            cid = new_cid()
+
+        if headers is None:
+            headers = {}
+
+        headers['Cid'] = cid
+
         # Create the Request.
         req = Request(
             method = method.upper(),
@@ -680,3 +693,33 @@ def session():
     """Returns a :class:`Session` for context-management."""
 
     return Session()
+
+
+def new_cid():
+    # Generate and return a new CID
+    return str(uuid4())
+
+
+def extract_cid(old_request):
+    if 'Cid' not in old_request['headers']:
+        raise ValueError('No cid found in the passed request')
+    else:
+        return old_request['headers']['Cid']
+
+
+def mutate_with_cid(immutable_headers):
+    """
+    To be used in @app.before_request function. It would look for Cid in the
+    header and add Cid if it doesn't exists.
+    The request header in before_request is immutable
+    werkzeug.datastructures.EnvironHeaders.
+    A new mutable dictionary header is created and returned.
+    """
+    if 'Cid' not in immutable_headers:
+        mutable_headers = {}
+        for k, v in immutable_headers.iteritems():
+            mutable_headers[k] = v
+        mutable_headers['Cid'] = new_cid()
+        return mutable_headers
+    else:
+        return immutable_headers

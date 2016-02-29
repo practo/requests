@@ -58,7 +58,7 @@ except ImportError:
 from . import utils
 from .models import Request, Response, PreparedRequest
 from .api import request, get, head, post, patch, put, delete, options
-from .sessions import session, Session
+from .sessions import session, Session, new_cid, extract_cid, mutate_with_cid
 from .status_codes import codes
 from .exceptions import (
     RequestException, Timeout, URLRequired,
