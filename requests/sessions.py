@@ -701,10 +701,10 @@ def new_cid():
 
 
 def extract_cid(old_request):
-    if 'Cid' not in old_request['headers']:
+    if 'Cid' not in old_request.headers:
         raise ValueError('No cid found in the passed request')
     else:
-        return old_request['headers']['Cid']
+        return old_request.headers['Cid']
 
 
 def mutate_with_cid(immutable_headers):

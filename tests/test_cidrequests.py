@@ -53,10 +53,10 @@ class TestRequest:
         assert 'Cid' in reqHeaders
 
     def test_extract_cid(self, httpbin):
-        r = requests.get(httpbin('get'), cid='12345')
-        #extracted_cid = requests.extract_cid(r.request)
-        # Write a proper test for this
-        assert True
+        dummy_req = requests.models.Request()
+        dummy_req.headers['Cid'] = '98765'
+        extracted_cid = requests.extract_cid(dummy_req)
+        assert extracted_cid == '98765'
 
     def test_mutate_with_cid(self, httpbin):
         r = requests.get(httpbin('get'), cid='1234')
