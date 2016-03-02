@@ -1,6 +1,9 @@
 Requests: HTTP for Humans
 =========================
 
+.. image:: https://travis-ci.org/practo/requests.svg?branch=master
+    :target: https://travis-ci.org/practo/requests
+    
 .. image:: https://img.shields.io/pypi/v/requests.svg
     :target: https://pypi.python.org/pypi/requests
 
