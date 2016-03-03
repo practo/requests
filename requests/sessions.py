@@ -405,7 +405,8 @@ class Session(SessionRedirectMixin):
         verify=None,
         cert=None,
         json=None,
-        cid=None):
+        cid=None,
+        no_cid=False):
         """Constructs a :class:`Request <Request>`, prepares it and sends it.
         Returns :class:`Response <Response>` object.
 
@@ -441,15 +442,15 @@ class Session(SessionRedirectMixin):
             If Tuple, ('cert', 'key') pair.
         """
 
-        # Check for a passed cid, if found, insert it into the header.
-        # If no cid is passed, generate a new cid and insert it into the header.
-        if cid is None:
-            cid = new_cid()
-
-        if headers is None:
-            headers = {}
-
-        headers['Cid'] = cid
+        # Add cid only if no_cid is not explicitely set to True
+        if not no_cid:
+            # Check for a passed cid, if found, insert it into the header.
+            # If no cid is passed, generate a new cid and insert it into the header.
+            if cid is None:
+                cid = new_cid()
+            if headers is None:
+                headers = {}
+            headers['Cid'] = cid
 
         # Create the Request.
         req = Request(
