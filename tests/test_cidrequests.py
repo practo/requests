@@ -52,7 +52,7 @@ class TestRequest:
         reqHeaders = r.json()['headers']
         assert 'Cid' in reqHeaders
 
-    def test_extract_cid(self, httpbin):
+    def test_extract_cid(self):
         dummy_req = requests.models.Request()
         dummy_req.headers['Cid'] = '98765'
         extracted_cid = requests.extract_cid(dummy_req)
@@ -72,3 +72,9 @@ class TestRequest:
         assert r.status_code == 200
         reqHeaders = r.json()['headers']
         assert 'Cid' not in reqHeaders
+
+    def test_lowecase_cid_extraction(self):
+        dummy_req = requests.models.Request()
+        dummy_req.headers['cid'] = '6666'
+        extracted_cid = requests.extract_cid(dummy_req)
+        assert extracted_cid == '6666'
