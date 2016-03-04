@@ -67,6 +67,11 @@ class TestRequest:
         new_header2 = requests.mutate_with_cid(new_header)
         assert 'Cid' in new_header2
 
+    def test_mutate_existing_lowecase_cid(self):
+        headers1 = {'cid': '2222', 'host': 'python'}
+        new_header = requests.mutate_with_cid(headers1)
+        assert new_header['cid'] == '2222'
+
     def test_no_cid(self, httpbin):
         r = requests.get(httpbin('get'), no_cid=True)
         assert r.status_code == 200
