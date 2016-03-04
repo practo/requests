@@ -718,7 +718,7 @@ def mutate_with_cid(immutable_headers):
     werkzeug.datastructures.EnvironHeaders.
     A new mutable dictionary header is created and returned.
     """
-    if 'Cid' not in immutable_headers:
+    if ('Cid' not in immutable_headers) and ('cid' not in immutable_headers):
         mutable_headers = {}
         for k, v in immutable_headers.iteritems():
             mutable_headers[k] = v
