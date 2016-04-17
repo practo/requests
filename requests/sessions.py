@@ -701,28 +701,35 @@ def new_cid():
     return str(uuid4())
 
 
-def extract_cid(old_request):
-    if 'Cid' in old_request.headers:
-        return old_request.headers['Cid']
-    elif 'cid' in old_request.headers:
-        return old_request.headers['cid']
+def extract_cid(obj):
+    """
+    Extract cid from request object or from a global object.
+    obj should be of type Request or a python dictionary.
+    """
+    if isinstance(obj, dict):
+        # obj is a global object dictionary
+        # return cid in the global object or generate a new cid and return
+        if ('Cid' in obj) or ('cid' in obj):
+            return obj.get('Cid') or obj.get('cid')
+        else:
+            return new_cid()
     else:
-        return new_cid()
+        # obj is a request object
+        # return cid from header or generate a new cid and return
+        return obj.headers.get('Cid') or obj.headers.get('cid') or new_cid()
 
 
-def mutate_with_cid(immutable_headers):
+def mutate_with_cid(immutable_headers, gobj):
     """
     To be used in @app.before_request function. It would look for Cid in the
-    header and add Cid if it doesn't exists.
-    The request header in before_request is immutable
-    werkzeug.datastructures.EnvironHeaders.
-    A new mutable dictionary header is created and returned.
+    header and add Cid to the global object. If Cid doesn't exists, it would
+    generate one and add it to the global object.
+    gobj should be a python dictonary.
     """
     if ('Cid' not in immutable_headers) and ('cid' not in immutable_headers):
-        mutable_headers = {}
-        for k, v in immutable_headers.iteritems():
-            mutable_headers[k] = v
-        mutable_headers['Cid'] = new_cid()
-        return mutable_headers
+        #mutable_headers = {}
+        #for k, v in immutable_headers.iteritems():
+        #    mutable_headers[k] = v
+        gobj['Cid'] = new_cid()
     else:
-        return immutable_headers
+        gobj['Cid'] = immutable_headers.get('Cid') or immutable_headers.get('cid')
