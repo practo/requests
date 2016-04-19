@@ -703,13 +703,10 @@ def new_cid():
 
 def extract_cid(gobj):
     """
-    Extract cid from flask global object.
+    Extract cid from flask global object. Generate a new cid if no cid found.
     gobj should be flask global object.
     """
-    if ('Cid' in gobj) or ('cid' in gobj):
-        return gobj.get('Cid') or gobj.get('cid')
-    else:
-        return new_cid()
+    return getattr(gobj, 'Cid', None) or getattr(gobj, 'cid', None) or new_cid()
 
 
 def mutate_with_cid(immutable_headers, gobj):
