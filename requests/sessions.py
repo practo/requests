@@ -8,15 +8,10 @@ This module provides a Session object to manage and persist settings across
 requests (cookies, auth, proxies).
 """
 import os
-<<<<<<< HEAD
-from collections import Mapping
-from datetime import datetime
 from uuid import uuid4
-=======
 import sys
 import time
 from datetime import timedelta
->>>>>>> upstream/master
 
 from .auth import _basic_auth_str
 from .compat import cookielib, is_py3, OrderedDict, urljoin, urlparse, Mapping
@@ -470,28 +465,10 @@ class Session(SessionRedirectMixin):
         return p
 
     def request(self, method, url,
-<<<<<<< HEAD
-        params=None,
-        data=None,
-        headers=None,
-        cookies=None,
-        files=None,
-        auth=None,
-        timeout=None,
-        allow_redirects=True,
-        proxies=None,
-        hooks=None,
-        stream=None,
-        verify=None,
-        cert=None,
-        json=None,
-        cid=None,
-        no_cid=False):
-=======
             params=None, data=None, headers=None, cookies=None, files=None,
             auth=None, timeout=None, allow_redirects=True, proxies=None,
-            hooks=None, stream=None, verify=None, cert=None, json=None):
->>>>>>> upstream/master
+            hooks=None, stream=None, verify=None, cert=None, json=None,
+            cid=None, no_cid=False):
         """Constructs a :class:`Request <Request>`, prepares it and sends it.
         Returns :class:`Response <Response>` object.
 
