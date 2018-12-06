@@ -63,6 +63,9 @@ Lower-Lower-Level Classes
 .. autoclass:: requests.PreparedRequest
    :inherited-members:
 
+.. autoclass:: requests.adapters.BaseAdapter
+   :inherited-members:
+
 .. autoclass:: requests.adapters.HTTPAdapter
    :inherited-members:
 
@@ -90,8 +93,8 @@ Cookies
 -------
 
 .. autofunction:: requests.utils.dict_from_cookiejar
-.. autofunction:: requests.utils.cookiejar_from_dict
 .. autofunction:: requests.utils.add_dict_to_cookiejar
+.. autofunction:: requests.cookies.cookiejar_from_dict
 
 .. autoclass:: requests.cookies.RequestsCookieJar
    :inherited-members:
@@ -104,19 +107,9 @@ Cookies
 Status Code Lookup
 ------------------
 
-.. autofunction:: requests.codes
+.. autoclass:: requests.codes
 
-::
-
-    >>> requests.codes['temporary_redirect']
-    307
-
-    >>> requests.codes.teapot
-    418
-
-    >>> requests.codes['\o/']
-    200
-
+.. automodule:: requests.status_codes
 
 
 Migrating to 1.x
@@ -146,7 +139,7 @@ API Changes
       s = requests.Session()    # formerly, session took parameters
       s.auth = auth
       s.headers.update(headers)
-      r = s.get('http://httpbin.org/headers')
+      r = s.get('https://httpbin.org/headers')
 
 * All request hooks have been removed except 'response'.
 
@@ -188,11 +181,11 @@ API Changes
 
       logging.basicConfig() # you need to initialize logging, otherwise you will not see anything from requests
       logging.getLogger().setLevel(logging.DEBUG)
-      requests_log = logging.getLogger("requests.packages.urllib3")
+      requests_log = logging.getLogger("urllib3")
       requests_log.setLevel(logging.DEBUG)
       requests_log.propagate = True
 
-      requests.get('http://httpbin.org/headers')
+      requests.get('https://httpbin.org/headers')
 
 
 
@@ -204,8 +197,8 @@ license from the ISC_ license to the `Apache 2.0`_ license. The Apache 2.0
 license ensures that contributions to Requests are also covered by the Apache
 2.0 license.
 
-.. _ISC: http://opensource.org/licenses/ISC
-.. _Apache 2.0: http://opensource.org/licenses/Apache-2.0
+.. _ISC: https://opensource.org/licenses/ISC
+.. _Apache 2.0: https://opensource.org/licenses/Apache-2.0
 
 
 Migrating to 2.x
@@ -220,7 +213,7 @@ For more details on the changes in this release including new APIs, links
 to the relevant GitHub issues and some of the bug fixes, read Cory's blog_
 on the subject.
 
-.. _blog: http://lukasa.co.uk/2013/09/Requests_20/
+.. _blog: https://lukasa.co.uk/2013/09/Requests_20/
 
 
 API Changes
@@ -258,6 +251,10 @@ Behavioural Changes
 
 * Keys in the ``headers`` dictionary are now native strings on all Python
   versions, i.e. bytestrings on Python 2 and unicode on Python 3. If the
-  keys are not native strings (unicode on Python2 or bytestrings on Python 3)
+  keys are not native strings (unicode on Python 2 or bytestrings on Python 3)
   they will be converted to the native string type assuming UTF-8 encoding.
 
+* Values in the ``headers`` dictionary should always be strings. This has
+  been the project's position since before 1.0 but a recent change
+  (since version 2.11.0) enforces this more strictly. It's advised to avoid
+  passing header values as unicode when possible.

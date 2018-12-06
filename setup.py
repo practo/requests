@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# Learn more: https://github.com/kennethreitz/setup.py
 import os
 import re
 import sys
@@ -9,13 +9,18 @@ from codecs import open
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
+here = os.path.abspath(os.path.dirname(__file__))
 
 class PyTest(TestCommand):
     user_options = [('pytest-args=', 'a', "Arguments to pass into py.test")]
 
     def initialize_options(self):
         TestCommand.initialize_options(self)
-        self.pytest_args = []
+        try:
+            from multiprocessing import cpu_count
+            self.pytest_args = ['-n', str(cpu_count()), '--boxed']
+        except (ImportError, NotImplementedError):
+            self.pytest_args = ['-n', '1', '--boxed']
 
     def finalize_options(self):
         TestCommand.finalize_options(self)
@@ -28,70 +33,77 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
-
+# 'setup.py publish' shortcut.
 if sys.argv[-1] == 'publish':
-    os.system('python setup.py sdist upload')
+    os.system('python setup.py sdist bdist_wheel')
+    os.system('twine upload dist/*')
     sys.exit()
 
-packages = [
-    'requests',
-    'requests.packages',
-    'requests.packages.chardet',
-    'requests.packages.urllib3',
-    'requests.packages.urllib3.packages',
-    'requests.packages.urllib3.contrib',
-    'requests.packages.urllib3.util',
-    'requests.packages.urllib3.packages.ssl_match_hostname',
+packages = ['requests']
+
+requires = [
+    'chardet>=3.0.2,<3.1.0',
+    'idna>=2.5,<2.8',
+    'urllib3>=1.21.1,<1.25',
+    'certifi>=2017.4.17'
+
+]
+test_requirements = [
+    'pytest-httpbin==0.0.7',
+    'pytest-cov',
+    'pytest-mock',
+    'pytest-xdist',
+    'PySocks>=1.5.6, !=1.5.7',
+    'pytest>=2.8.0'
 ]
 
-requires = []
-test_requirements = ['pytest>=2.8.0', 'pytest-httpbin==0.0.7', 'pytest-cov']
+about = {}
+with open(os.path.join(here, 'requests', '__version__.py'), 'r', 'utf-8') as f:
+    exec(f.read(), about)
 
-with open('requests/__init__.py', 'r') as fd:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
-                        fd.read(), re.MULTILINE).group(1)
-
-if not version:
-    raise RuntimeError('Cannot find version information')
-
-with open('README.rst', 'r', 'utf-8') as f:
+with open('README.md', 'r', 'utf-8') as f:
     readme = f.read()
-with open('HISTORY.rst', 'r', 'utf-8') as f:
+with open('HISTORY.md', 'r', 'utf-8') as f:
     history = f.read()
 
 setup(
-    name='requests',
-    version=version,
-    description='Python HTTP for Humans.',
-    long_description=readme + '\n\n' + history,
-    author='Kenneth Reitz',
-    author_email='me@kennethreitz.com',
-    url='http://python-requests.org',
+    name=about['__title__'],
+    version=about['__version__'],
+    description=about['__description__'],
+    long_description=readme,
+    long_description_content_type='text/markdown',
+    author=about['__author__'],
+    author_email=about['__author_email__'],
+    url=about['__url__'],
     packages=packages,
     package_data={'': ['LICENSE', 'NOTICE'], 'requests': ['*.pem']},
     package_dir={'requests': 'requests'},
     include_package_data=True,
+    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
     install_requires=requires,
-    license='Apache 2.0',
+    license=about['__license__'],
     zip_safe=False,
-    classifiers=(
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
-    ),
+    ],
     cmdclass={'test': PyTest},
     tests_require=test_requirements,
     extras_require={
-        'security': ['pyOpenSSL>=0.13', 'ndg-httpsclient', 'pyasn1'],
+        'security': ['pyOpenSSL >= 0.14', 'cryptography>=1.3.4', 'idna>=2.0.0'],
+        'socks': ['PySocks>=1.5.6, !=1.5.7'],
+        'socks:sys_platform == "win32" and python_version == "2.7"': ['win_inet_pton'],
     },
 )
